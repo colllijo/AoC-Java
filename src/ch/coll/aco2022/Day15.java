@@ -4,9 +4,9 @@ import ch.coll.aoc.Day;
 import ch.coll.aoc.Runner;
 
 import java.awt.*;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 
 public class Day15 implements Day {
     @Override
@@ -49,84 +49,86 @@ public class Day15 implements Day {
             }
         }
 
-
         return uniqueValues + "";
     }
 
     @Override
     public String part2(String input) {
         ArrayList<Sensor> sensors = new ArrayList<>();
-        ArrayList<Point> beacons = new ArrayList<>();
-        ArrayList<Integer> covered = new ArrayList<>();
+        ArrayList<Point> possiblePositions = new ArrayList<>();
 
-        //Create sensors
         for (String reading : input.split("\n")) {
-            Sensor currentSensor = new Sensor();
+            Sensor curSensor = new Sensor();
+            curSensor.x = Integer.parseInt(reading.split("x=")[1].split(", ")[0]);
+            curSensor.y = Integer.parseInt(reading.split("y=")[1].split(": ")[0]);
 
-            currentSensor.x = Integer.parseInt(reading.split(" ")[2].split("=")[1].replace(",", ""));
-            currentSensor.y = Integer.parseInt(reading.split(" ")[3].split("=")[1].replace(":", ""));
-            currentSensor.closestBeacon = new Point(Integer.parseInt(reading.split(" ")[8].split("=")[1].replace(",", "")), Integer.parseInt(reading.split(" ")[9].split("=")[1].replace(":", "")));
-            currentSensor.distanceToClosestBeacon = Math.abs(currentSensor.x - currentSensor.closestBeacon.x) + Math.abs(currentSensor.y - currentSensor.closestBeacon.y);
+            curSensor.closestBeacon = new Point(
+                    Integer.parseInt(reading.split("x=")[2].split(", ")[0]),
+                    Integer.parseInt(reading.split("y=")[2].split("\n")[0])
+            );
 
-            sensors.add(currentSensor);
-            beacons.add(currentSensor.closestBeacon);
+            curSensor.distanceToClosestBeacon = Math.abs(curSensor.x - curSensor.closestBeacon.x) + Math.abs(curSensor.y - curSensor.closestBeacon.y);
+            sensors.add(curSensor);
         }
 
-        int tuningFrequency = 0;
+        for (Sensor sensor : sensors) {
+            for (int i = 0; i < sensor.distanceToClosestBeacon; i++) {
+                possiblePositions.add(new Point(sensor.x + i, sensor.y + ((sensor.distanceToClosestBeacon + 1) - i)));
+                possiblePositions.add(new Point(sensor.x + i, sensor.y - ((sensor.distanceToClosestBeacon + 1) - i)));
+                possiblePositions.add(new Point(sensor.x - i, sensor.y + ((sensor.distanceToClosestBeacon + 1) - i)));
+                possiblePositions.add(new Point(sensor.x - i, sensor.y - ((sensor.distanceToClosestBeacon + 1) - i)));
+            }
+        }
 
-        if(!input.equals("Sensor at x=2, y=18: closest beacon is at x=-2, y=15\n" +
-                "Sensor at x=9, y=16: closest beacon is at x=10, y=16\n" +
-                "Sensor at x=13, y=2: closest beacon is at x=15, y=3\n" +
-                "Sensor at x=12, y=14: closest beacon is at x=10, y=16\n" +
-                "Sensor at x=10, y=20: closest beacon is at x=10, y=16\n" +
-                "Sensor at x=14, y=17: closest beacon is at x=10, y=16\n" +
-                "Sensor at x=8, y=7: closest beacon is at x=2, y=10\n" +
-                "Sensor at x=2, y=0: closest beacon is at x=2, y=10\n" +
-                "Sensor at x=0, y=11: closest beacon is at x=2, y=10\n" +
-                "Sensor at x=20, y=14: closest beacon is at x=25, y=17\n" +
-                "Sensor at x=17, y=20: closest beacon is at x=21, y=22\n" +
-                "Sensor at x=16, y=7: closest beacon is at x=15, y=3\n" +
-                "Sensor at x=14, y=3: closest beacon is at x=15, y=3\n" +
-                "Sensor at x=20, y=1: closest beacon is at x=15, y=3")) {
-            for(int y = 0; y < 4000000; y++) {
-                System.out.println("Checking y = " + y);
-                for(int x = 0; x < 4000000; x++) {
+        System.out.println("with duplicates " + possiblePositions.size());
 
-                    boolean inRange = false;
-                    for(Sensor sensor : sensors) {
-                        if(Math.abs(x - sensor.x) + Math.abs(y - sensor.y) <= sensor.distanceToClosestBeacon) {
-                            inRange = true;
-                        }
-                    }
+        Set<Point> s = new LinkedHashSet<>(possiblePositions);
+        possiblePositions.clear();
+        possiblePositions.addAll(s);
 
-                    if(!inRange) {
-                        tuningFrequency = x * y;
-                        return tuningFrequency + "";
-                    }
+        System.out.println("without duplicates " + possiblePositions.size());
+
+        System.out.println(possiblePositions.size());
+
+        ArrayList<Point> actualPoints = new ArrayList<>();
+
+        for (Point point : possiblePositions) {
+            boolean distressOrigin = true;
+
+            for (Sensor sensor : sensors) {
+                if (Math.abs(sensor.x - point.x) + Math.abs(sensor.y - point.y) <= sensor.distanceToClosestBeacon) {
+                    distressOrigin = false;
+                    break;
+                }
+            }
+
+            if (distressOrigin) {
+                actualPoints.add(point);
+            }
+        }
+
+        System.out.println(actualPoints.size());
+
+        possiblePositions = actualPoints;
+        actualPoints = new ArrayList<>();
+
+        for(Point point : possiblePositions) {
+            if(point.x >= 0 && point.x <= 4000000) {
+                if(point.y >= 0 && point.y <= 4000000) {
+                    actualPoints.add(point);
                 }
             }
         }
 
-        return tuningFrequency + "";
+        System.out.println(actualPoints.size());
+
+        return "" + (((long) actualPoints.get(0).x * 4000000L) + ((long) actualPoints.get(0).y));
     }
 
     public static void main(String[] args) {
         try {
             Runner.input =
-                    "Sensor at x=2, y=18: closest beacon is at x=-2, y=15\n" +
-                    "Sensor at x=9, y=16: closest beacon is at x=10, y=16\n" +
-                    "Sensor at x=13, y=2: closest beacon is at x=15, y=3\n" +
-                    "Sensor at x=12, y=14: closest beacon is at x=10, y=16\n" +
-                    "Sensor at x=10, y=20: closest beacon is at x=10, y=16\n" +
-                    "Sensor at x=14, y=17: closest beacon is at x=10, y=16\n" +
-                    "Sensor at x=8, y=7: closest beacon is at x=2, y=10\n" +
-                    "Sensor at x=2, y=0: closest beacon is at x=2, y=10\n" +
-                    "Sensor at x=0, y=11: closest beacon is at x=2, y=10\n" +
-                    "Sensor at x=20, y=14: closest beacon is at x=25, y=17\n" +
-                    "Sensor at x=17, y=20: closest beacon is at x=21, y=22\n" +
-                    "Sensor at x=16, y=7: closest beacon is at x=15, y=3\n" +
-                    "Sensor at x=14, y=3: closest beacon is at x=15, y=3\n" +
-                    "Sensor at x=20, y=1: closest beacon is at x=15, y=3";
+                    "";
             Runner.run((Day) Class.forName(Thread.currentThread().getStackTrace()[1].getClassName()).getDeclaredConstructor().newInstance(), "2022-12-15");
         } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException |
                  InvocationTargetException exception) {
