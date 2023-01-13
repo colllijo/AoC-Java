@@ -11,7 +11,7 @@ import java.net.URL;
 import java.time.LocalDate;
 
 public class Input {
-    private static String SESSION_ID = ChromeCookie.getCookie(".adventofcode.com", "session");
+    private static String SESSION_ID;
     private static LocalDate DATE = LocalDate.now();
     private static String BASE_URL = "https://adventofcode.com/%d/day/%d/input";
     private static String BASE_FILE = "input/%d/day%d.txt";
@@ -35,6 +35,10 @@ public class Input {
         }
 
         try {
+            if(SESSION_ID == null) {
+                SESSION_ID = ChromeCookie.getCookie(".adventofcode.com", "session");
+            }
+
             URL url = new URL(String.format(BASE_URL, DATE.getYear(), DATE.getDayOfMonth()));
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
