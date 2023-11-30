@@ -9,6 +9,7 @@ public class Runner {
     }
 
     public static void run(Day d, String day) {
+		Input.setSessionId("53616c7465645f5fbe71abf02de0fd8613552cef114059fb46c1fd79b615362b97683dec5880ad4dfafd60b8c3c4c60652b4f4a92a8e551c60b6ccaab03abeb8");
         Input.setDate(LocalDate.of(Integer.parseInt(day.split("[- ]")[0]), Integer.parseInt(day.split("[- ]")[1]), Integer.parseInt(day.split("[- ]")[2])));
 
         String part1t = null;

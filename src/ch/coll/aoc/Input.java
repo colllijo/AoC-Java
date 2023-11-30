@@ -36,6 +36,8 @@ public class Input {
 
         try {
             if(SESSION_ID == null) {
+				// If chrome is beeing used as browser it may be possible to programtically retrieve the SESSION_ID using the method below
+				// elsewise the session should be set in the runner.
                 SESSION_ID = ChromeCookie.getCookie(".adventofcode.com", "session");
             }
 
